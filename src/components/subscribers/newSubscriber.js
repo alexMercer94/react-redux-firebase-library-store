@@ -42,7 +42,7 @@ class NewSubscriber extends Component {
     render() {
         return (
             <div className="row">
-                <div className="col-md-12 mb-4">
+                <div className="col-12 mb-4">
                     <Link to={'/subscribers'} className="btn btn-secondary">
                         <i className="fas fa-arrow-circle-left"></i>
                         {''} Volver al Listado
@@ -53,7 +53,7 @@ class NewSubscriber extends Component {
                         <i className="fas fa-user-plus"></i> {''} Nuevo Subscriptor
                     </h2>
                 </div>
-                <div className="row justify-content-center">
+                <div className="row col-12 justify-content-center mb-5">
                     <div className="col-md-8 mt-5">
                         <form onSubmit={this.addSubscriber}>
                             <div className="form-group">
