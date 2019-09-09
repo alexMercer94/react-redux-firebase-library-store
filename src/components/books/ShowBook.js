@@ -7,6 +7,23 @@ import Spinner from '../layout/Spinner';
 import PropTypes from 'prop-types';
 
 class ShowBook extends Component {
+    devolverLibro = id => {
+        const { firestore } = this.props;
+        // copia del libro
+        const bookUpdated = { ...this.props.book };
+        // Eliminar la persona que esta realizando la devolución de prestados
+        const loans = bookUpdated.loans.filter(element => element.code !== id);
+        bookUpdated.loans = loans;
+        // Actualizar en firebase
+        firestore.update(
+            {
+                collection: 'books',
+                doc: bookUpdated.id
+            },
+            bookUpdated
+        );
+    };
+
     render() {
         // Extraer libro
         const { book } = this.props;
@@ -57,6 +74,36 @@ class ShowBook extends Component {
 
                     {/* Boton para solicitar un prestamo de libro */}
                     {btnLoan}
+
+                    {/* Muestralas personas que tienen los libro */}
+                    <h3 className="my-2">Persona que tienen el libro Prestado</h3>
+                    {book.loans.map(loan => (
+                        <div key={loan.code} className="card my-2">
+                            <h4 className="card-header">
+                                {loan.name} {loan.surname}
+                            </h4>
+                            <div className="card-body">
+                                <p>
+                                    <span className="font-weight-bold">Código:</span> {loan.code}
+                                </p>
+                                <p>
+                                    <span className="font-weight-bold">Carrera:</span> {loan.career}
+                                </p>
+                                <p>
+                                    <span className="font-weight-bold">Fecha de Solicitud:</span> {loan.fecha_solicitud}
+                                </p>
+                            </div>
+                            <div className="card-footer">
+                                <button
+                                    type="button"
+                                    className="btn btn-success font-weight-bold"
+                                    onClick={() => this.devolverLibro(loan.code)}
+                                >
+                                    Realizar Devolución
+                                </button>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
