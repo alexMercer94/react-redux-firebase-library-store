@@ -6,13 +6,13 @@ import 'firebase/firestore';
 
 // Setting firestore
 const firebaseConfig = {
-    apiKey: 'AIzaSyDJLcAy3mpqxuianv5g6OljZd2rrA71BiU',
-    authDomain: 'bibliostore-react.firebaseapp.com',
-    databaseURL: 'https://bibliostore-react.firebaseio.com',
-    projectId: 'bibliostore-react',
-    storageBucket: 'bibliostore-react.appspot.com',
-    messagingSenderId: '1026235380976',
-    appId: '1:1026235380976:web:6e9059ba31b8918f'
+    apiKey: 'AIzaSyCf6Kg1YSUw2t_wQAyJQOdGaIagL1FrABY',
+    authDomain: 'react-bookstore-d3fc7.firebaseapp.com',
+    databaseURL: 'https://react-bookstore-d3fc7.firebaseio.com',
+    projectId: 'react-bookstore-d3fc7',
+    storageBucket: '',
+    messagingSenderId: '763106169251',
+    appId: '1:763106169251:web:84429af96b4a324f5e8a16'
 };
 
 // Init firebase

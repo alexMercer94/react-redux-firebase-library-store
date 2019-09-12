@@ -104,7 +104,7 @@ class NewSubscriber extends Component {
                                     value={this.state.code}
                                 ></input>
                             </div>
-                            <input type="subtmit" value="Agregar subscriptor" className="btn btn-success"></input>
+                            <input type="submit" value="Agregar subscriptor" className="btn btn-success"></input>
                         </form>
                     </div>
                 </div>

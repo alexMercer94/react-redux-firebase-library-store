@@ -12,6 +12,7 @@ import ShowBook from './components/books/ShowBook';
 import NewBook from './components/books/NewBook';
 import EditBook from './components/books/EditBook';
 import LoanBook from './components/books/LoanBook';
+import Login from './components/auth/Login';
 
 function App() {
     return (
@@ -30,6 +31,8 @@ function App() {
                         <Route exact path="/subscribers/new" component={NewSubscriber}></Route>
                         <Route exact path="/subscribers/show/:id" component={ShowSubscriber}></Route>
                         <Route exact path="/subscribers/edit/:id" component={EditSubscriber}></Route>
+
+                        <Route exact path="/login" component={Login}></Route>
                     </Switch>
                 </div>
             </Router>
