@@ -1,40 +1,96 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { compose } from 'redux';
+import { connect } from 'react-redux';
+import { firebaseConnect } from 'react-redux-firebase';
+import PropTypes from 'prop-types';
 
-const Navbar = () => {
-    return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-            <nav className="navbar navbar-light">
-                <span className="navbar-brand mb-0 h1">Administrador de Biblioteca</span>
+class Navbar extends Component {
+    state = {
+        isAuthenticated: false
+    };
+
+    // Recibir los props automaticamente
+    static getDerivedStateFromProps(props, state) {
+        const { auth } = props;
+
+        if (auth.uid) {
+            return { isAuthenticated: true };
+        } else {
+            return { isAuthenticated: false };
+        }
+    }
+
+    // Cerrar la sesión
+    logout = () => {
+        const { firebase } = this.props;
+        firebase.logout();
+    };
+
+    render() {
+        const { isAuthenticated } = this.state;
+        // Extraer datos de autenticación
+        const { auth } = this.props;
+        return (
+            <nav className="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+                <nav className="navbar navbar-light">
+                    <span className="navbar-brand mb-0 h1">Administrador de Biblioteca</span>
+                </nav>
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-toggle="collapse"
+                    data-target="#navbarColor01"
+                    aria-controls="navbarColor01"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+
+                <div className="collapse navbar-collapse" id="navbarColor01">
+                    {isAuthenticated ? (
+                        <ul className="navbar-nav mr-auto">
+                            <li className="nav-item">
+                                <Link to={'/subscribers'} className="nav-link">
+                                    Subscriptores
+                                </Link>
+                            </li>
+                            <li className="nav-item">
+                                <Link to={'/'} className="nav-link">
+                                    Libros
+                                </Link>
+                            </li>
+                        </ul>
+                    ) : null}
+                    {isAuthenticated ? (
+                        <ul className="navbar-nav ml-auto">
+                            <li className="nav-item">
+                                <a href="#!" className="nav-link">
+                                    {auth.email}
+                                </a>
+                            </li>
+                            <li className="nav-item">
+                                <button type="button" className="btn btn-danger" onClick={this.logout}>
+                                    Cerrar Sesión
+                                </button>
+                            </li>
+                        </ul>
+                    ) : null}
+                </div>
             </nav>
-            <button
-                className="navbar-toggler"
-                type="button"
-                data-toggle="collapse"
-                data-target="#navbarColor01"
-                aria-controls="navbarColor01"
-                aria-expanded="false"
-                aria-label="Toggle navigation"
-            >
-                <span className="navbar-toggler-icon"></span>
-            </button>
+        );
+    }
+}
 
-            <div className="collapse navbar-collapse" id="navbarColor01">
-                <ul className="navbar-nav mr-auto">
-                    <li className="nav-item">
-                        <Link to={'/subscribers'} className="nav-link">
-                            Subscriptores
-                        </Link>
-                    </li>
-                    <li className="nav-item">
-                        <Link to={'/'} className="nav-link">
-                            Libros
-                        </Link>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    );
+Navbar.propTypes = {
+    firebase: PropTypes.object.isRequired,
+    auth: PropTypes.object.isRequired
 };
 
-export default Navbar;
+export default compose(
+    firebaseConnect(),
+    connect((state, props) => ({
+        auth: state.firebase.auth
+    }))
+)(Navbar);

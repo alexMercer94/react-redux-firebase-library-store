@@ -1,9 +1,38 @@
 import React, { Component } from 'react';
+import { firebaseConnect } from 'react-redux-firebase';
+import PropTypes from 'prop-types';
 
 class Login extends Component {
     state = {
         email: '',
         password: ''
+    };
+
+    // Almacenar lo que el usuario escriba en el state
+    readData = e => {
+        this.setState({
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // Iniciar sesión en firebase
+    login = e => {
+        e.preventDefault();
+        //Extraer firebase de props
+        const { firebase } = this.props;
+        // Extraer data del state
+        const { email, password } = this.state;
+
+        // Autenticar el usuario
+        firebase
+            .login({
+                email,
+                password
+            })
+            .then(result => {
+                console.log('Iniciaste Sesión');
+            })
+            .catch(error => console.log('Error'));
     };
 
     render() {
@@ -16,11 +45,11 @@ class Login extends Component {
                                 <i className="fas fa-lock"></i> {''}
                                 Iniciar Sesión
                             </h2>
-                            <form>
+                            <form onSubmit={this.login}>
                                 <div className="form-group">
                                     <label>Email:</label>
                                     <input
-                                        type="text"
+                                        type="email"
                                         className="form-control"
                                         name="email"
                                         required
@@ -53,4 +82,8 @@ class Login extends Component {
     }
 }
 
-export default Login;
+Login.propType = {
+    firebase: PropTypes.object.isRequired
+};
+
+export default firebaseConnect()(Login);

@@ -4,13 +4,14 @@ import { connect } from 'react-redux';
 import { firestoreConnect } from 'react-redux-firebase';
 import { Link } from 'react-router-dom';
 import Spinner from '../layout/Spinner';
-import PropTypes from 'prop-types';
 import SubscriberTicket from '../subscribers/subscriberTicket';
+
+// Redux actions
+import { searchUser } from '../../redux/actions/seachUserActions';
 
 class LoanBook extends Component {
     state = {
         search: '',
-        result: {},
         noResult: false
     };
 
@@ -21,7 +22,7 @@ class LoanBook extends Component {
         // Obtener el valor a buscar
         const { search } = this.state;
         // Extraer firesfotre
-        const { firestore } = this.props;
+        const { firestore, searchUser } = this.props;
         // Hacer la consulta
         const collection = firestore.collection('subscribers');
         const query = collection.where('code', '==', search).get();
@@ -30,14 +31,18 @@ class LoanBook extends Component {
         query.then(response => {
             if (response.empty) {
                 // No hay resultados
+                // Almacenar en redux un objeto vacio
+                searchUser({});
+                // Actualizar el state en base si hay resultados
                 this.setState({
-                    noResult: true,
-                    result: {}
+                    noResult: true
                 });
             } else {
                 const data = response.docs[0];
+                // Colocar el resultado en el State de Redux
+                searchUser(data.data());
+                // Actualizar el state en base si hay resultados
                 this.setState({
-                    result: data.data(),
                     noResult: false
                 });
             }
@@ -46,17 +51,22 @@ class LoanBook extends Component {
 
     // Almacena los datos del Alumnopara solicitar el libro
     applyForLoan = () => {
-        const subscriber = this.state.result;
+        const { user } = this.props;
         // Fecha de alta
-        subscriber.fecha_solicitud = new Date().toLocaleDateString();
-        // Obetener el libro
-        const bookUpdated = this.props.book;
+        user.fecha_solicitud = new Date().toLocaleDateString();
+        // No se pueden mutar los props, tomar una copia y crear un arreglo nuevo.ml-autolet
+        let loans = [];
+        loans = [...this.props.book.loans, user];
 
-        // Agregar el susbcriptor al libro
-        bookUpdated.loans.push(subscriber);
+        // Copiar el objeto y agregar los prestados
+        const book = { ...this.props.book };
 
+        // Eliminar los prestado anteriores
+        delete book.loans;
+        // Asignar los prestados
+        book.loans = loans;
         // Obtener firestore y history de props
-        const { firestore, history, book } = this.props;
+        const { firestore, history } = this.props;
         // Almacenar en la BD
         firestore
             .update(
@@ -64,7 +74,7 @@ class LoanBook extends Component {
                     collection: 'books',
                     doc: book.id
                 },
-                bookUpdated
+                book
             )
             .then(history.push('/'));
     };
@@ -80,12 +90,15 @@ class LoanBook extends Component {
         // Extraerel libro
         const { book } = this.props;
 
+        // Mostrar spinner
+        if (!book) return <Spinner></Spinner>;
+
         // Extraer los datos del alumno
-        const { noResult, result } = this.state;
+        const { user } = this.props;
 
         let studentTicket, btnSolicit;
-        if (result.name) {
-            studentTicket = <SubscriberTicket student={result}></SubscriberTicket>;
+        if (user.name) {
+            studentTicket = <SubscriberTicket student={user}></SubscriberTicket>;
             btnSolicit = (
                 <button type="button" className="btn btn-primary btn-block mb-4" onClick={this.applyForLoan}>
                     Solicitar Prestamo
@@ -96,8 +109,15 @@ class LoanBook extends Component {
             btnSolicit = null;
         }
 
-        // Mostrar spinner
-        if (!book) return <Spinner></Spinner>;
+        // Mostrar un mensaje de error
+        let messageResult = '';
+        const { noResult } = this.state;
+        if (noResult) {
+            messageResult = <div className="alert alert-danger text-center font-weight-bold">No hay resultados</div>;
+        } else {
+            messageResult = null;
+        }
+
         return (
             <div className="row">
                 <div className="col-12 mb-4">
@@ -133,6 +153,8 @@ class LoanBook extends Component {
                             {/* Muestra la ficha del alumno y el boton para solicitar el prestamos */}
                             {studentTicket}
                             {btnSolicit}
+                            {/* Muestra un mensaje de no resultados */}
+                            {messageResult};
                         </div>
                     </div>
                 </div>
@@ -149,7 +171,11 @@ export default compose(
             doc: props.match.params.id
         }
     ]),
-    connect(({ firestore: { ordered } }, props) => ({
-        book: ordered.book && ordered.book[0]
-    }))
+    connect(
+        ({ firestore: { ordered }, user }, props) => ({
+            book: ordered.book && ordered.book[0],
+            user: user
+        }),
+        { searchUser }
+    )
 )(LoanBook);
